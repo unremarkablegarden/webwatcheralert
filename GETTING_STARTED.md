@@ -43,9 +43,12 @@ From the main menu, press `2` or select "List Watchers":
 
 - **↑/↓ or j/k**: Navigate the list
 - **t**: Toggle watcher enabled/disabled
+- **e**: Edit watcher (change URL, keywords, or interval)
 - **d**: Delete watcher
 - **a**: Add new watcher
 - **Esc**: Return to main menu
+
+When editing, you can modify the URL, keywords, or check interval. Press Enter to save changes or Esc to cancel.
 
 ### 4. Start Monitoring
 

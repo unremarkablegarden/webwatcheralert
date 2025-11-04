@@ -25,9 +25,18 @@ check_installed() {
     fi
 }
 
-# Check if service is running
+# Check if service is running (has a PID)
 is_running() {
-    launchctl list | grep -q "$SERVICE_NAME"
+    # Get the output for this service
+    local output=$(launchctl list "$SERVICE_NAME" 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        # Service not even loaded
+        return 1
+    fi
+
+    # Check if there's a PID (number) in the first column
+    # If PID is "-", service is loaded but not running
+    echo "$output" | grep -q '"PID" = [0-9]'
 }
 
 # Show usage
@@ -83,7 +92,9 @@ stop_service() {
     fi
 
     echo -e "${BLUE}Stopping service...${NC}"
-    launchctl stop "$SERVICE_NAME"
+    # Use kill with SIGTERM instead of stop (works better for non-KeepAlive services)
+    # Format: gui/<uid>/<service-name>
+    launchctl kill SIGTERM "gui/$(id -u)/$SERVICE_NAME"
     sleep 1
 
     if ! is_running; then

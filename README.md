@@ -42,7 +42,11 @@ cargo run
 The interactive TUI will guide you through:
 
 1. **Add Watcher**: Enter URL, keywords (comma-separated), and check interval
-2. **List Watchers**: View all watchers, enable/disable, or delete them
+2. **List Watchers**: View all watchers, toggle enable/disable, edit, or delete them
+   - Press `t` to toggle enabled/disabled
+   - Press `e` to edit a watcher
+   - Press `d` to delete a watcher
+   - Press `a` to add a new watcher
 3. **Start Monitoring**: Run the background monitoring process
 4. **Exit**: Close the application
 
