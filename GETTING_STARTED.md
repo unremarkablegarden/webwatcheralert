@@ -55,6 +55,82 @@ From the main menu, press `3` or select "Start Monitoring":
 - When content changes and keywords are found, you'll get a macOS notification
 - Press `Ctrl+C` to stop monitoring
 
+## Running as a Background Service
+
+Want to keep monitoring even after closing the terminal? Set up the background service:
+
+### Initial Setup (One Time)
+
+```bash
+# 1. First, configure your watchers using the TUI
+cargo run
+
+# 2. Add your watchers, then exit
+
+# 3. Build the release version
+cargo build --release
+
+# 4. Install the service
+./scripts/install-service.sh
+```
+
+You'll see a success message with available commands.
+
+### Daily Usage
+
+```bash
+# Start monitoring in background
+./scripts/service.sh start
+
+# Check if it's running
+./scripts/service.sh status
+
+# View recent activity
+./scripts/service.sh logs
+
+# Stop when you want to make changes
+./scripts/service.sh stop
+```
+
+### Viewing Logs
+
+```bash
+# See last 50 lines of logs
+./scripts/service.sh logs
+
+# Follow logs in real-time (like tail -f)
+./scripts/service.sh logs-tail
+
+# View full stdout log
+./scripts/service.sh logs-stdout
+
+# View full error log
+./scripts/service.sh logs-stderr
+```
+
+### Log Format
+
+Logs show:
+- Timestamp for each check
+- Which URL is being checked
+- Whether keywords were found
+- Any errors that occurred
+
+Example log output:
+```
+[2025-11-04 16:30:15] Starting monitoring for 2 watchers...
+[2025-11-04 16:30:15] Watcher: https://example.com | Keywords: sale, discount | Interval: 30min
+[2025-11-04 16:30:15] Checking https://example.com...
+[2025-11-04 16:30:16]   ✓ Keywords found: sale, discount | Notification sent
+```
+
+### Benefits of Background Service
+
+- ✅ **Runs 24/7** - Keeps monitoring even when you log out of terminal
+- ✅ **Persistent** - Terminal can be closed, monitoring continues
+- ✅ **Logged** - All activity saved to files for review
+- ✅ **Easy Control** - Simple commands to start/stop/check status
+
 ## Example Use Cases
 
 ### 1. Monitor Product Sales

@@ -55,6 +55,55 @@ Monitor a product page for sales:
 
 When any of these keywords appear in new content, you'll receive a macOS notification with a snippet showing the matched text in context!
 
+## Running as a Background Service
+
+To run the monitoring in the background (persisting even after closing the terminal), use the LaunchAgent service:
+
+### One-Time Setup
+
+```bash
+# Build the release binary
+cargo build --release
+
+# Install the service
+./scripts/install-service.sh
+```
+
+### Controlling the Service
+
+```bash
+# Start monitoring in background
+./scripts/service.sh start
+
+# Check if running
+./scripts/service.sh status
+
+# View recent logs
+./scripts/service.sh logs
+
+# Follow logs in real-time
+./scripts/service.sh logs-tail
+
+# Stop monitoring
+./scripts/service.sh stop
+
+# Restart the service
+./scripts/service.sh restart
+
+# Uninstall the service
+./scripts/service.sh uninstall
+```
+
+### Service Features
+
+- ✅ **Runs independently** - Monitoring continues even if you close the terminal
+- ✅ **Manual control** - Start/stop when needed (not auto-start on login)
+- ✅ **Comprehensive logging** - All checks logged to `~/.local/share/web-watcher-alert/logs/`
+- ✅ **Easy management** - Simple commands to control the service
+- ✅ **macOS native** - Uses LaunchAgent for proper integration
+
+**Note**: Configure your watchers using the TUI first (`cargo run`), then start the background service.
+
 ## Project Structure
 
 ```

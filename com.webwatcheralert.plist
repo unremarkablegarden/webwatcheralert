@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Service label (unique identifier) -->
+    <key>Label</key>
+    <string>com.webwatcheralert</string>
+
+    <!-- Path to the executable -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>BINARY_PATH_PLACEHOLDER</string>
+        <string>--daemon</string>
+    </array>
+
+    <!-- Working directory -->
+    <key>WorkingDirectory</key>
+    <string>HOME_PATH_PLACEHOLDER</string>
+
+    <!-- Standard output log -->
+    <key>StandardOutPath</key>
+    <string>LOG_PATH_PLACEHOLDER/stdout.log</string>
+
+    <!-- Standard error log -->
+    <key>StandardErrorPath</key>
+    <string>LOG_PATH_PLACEHOLDER/stderr.log</string>
+
+    <!-- Do not start automatically (manual control) -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Run only when user is logged in -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- Environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>HOME_PATH_PLACEHOLDER</string>
+    </dict>
+</dict>
+</plist>

@@ -44,8 +44,18 @@ impl Monitor {
             return Ok(());
         }
 
-        println!("Starting monitoring for {} watchers...", enabled_watchers.len());
+        println!("[{}] Starting monitoring for {} watchers...", Utc::now().format("%Y-%m-%d %H:%M:%S"), enabled_watchers.len());
         println!("Press Ctrl+C to stop.\n");
+
+        // Log each watcher being started
+        for watcher in &enabled_watchers {
+            println!("[{}] Watcher: {} | Keywords: {} | Interval: {}min",
+                Utc::now().format("%Y-%m-%d %H:%M:%S"),
+                watcher.url,
+                watcher.keywords.join(", "),
+                watcher.check_interval.as_secs() / 60);
+        }
+        println!();
 
         // Spawn a task for each watcher
         let mut handles = Vec::new();
@@ -72,15 +82,17 @@ async fn monitor_watcher(mut watcher: Watcher, config: Arc<Mutex<Config>>) {
         // Wait for the check interval
         sleep(watcher.check_interval).await;
 
-        println!("[{}] Checking {}...", Utc::now().format("%H:%M:%S"), watcher.url);
+        let timestamp = Utc::now().format("%Y-%m-%d %H:%M:%S");
+        println!("[{}] Checking {}...", timestamp, watcher.url);
 
         // Perform the check
         match check_watcher(&mut watcher).await {
-            Ok(found_matches) => {
+            Ok((found_matches, matched_keywords)) => {
                 if found_matches {
-                    println!("  ✓ Keywords found! Notification sent.");
+                    println!("[{}]   ✓ Keywords found: {} | Notification sent",
+                        timestamp, matched_keywords.join(", "));
                 } else {
-                    println!("  - No changes or keywords found.");
+                    println!("[{}]   - No changes or keywords found", timestamp);
                 }
 
                 // Update last_checked timestamp
@@ -94,15 +106,17 @@ async fn monitor_watcher(mut watcher: Watcher, config: Arc<Mutex<Config>>) {
                 let _ = cfg.save();
             }
             Err(e) => {
-                eprintln!("  ✗ Error: {}", e);
+                eprintln!("[{}]   ✗ Error: {}", Utc::now().format("%Y-%m-%d %H:%M:%S"), e);
             }
         }
     }
 }
 
 /// Check a single watcher once
-/// Returns Ok(true) if keywords were found, Ok(false) otherwise
-async fn check_watcher(watcher: &Watcher) -> Result<bool> {
+/// Returns Ok((found_matches, matched_keywords)) where:
+/// - found_matches: true if keywords were found, false otherwise
+/// - matched_keywords: list of keywords that were found
+async fn check_watcher(watcher: &Watcher) -> Result<(bool, Vec<String>)> {
     // 1. Fetch the URL
     let new_content = fetcher::fetch_url(&watcher.url)
         .await
@@ -119,7 +133,7 @@ async fn check_watcher(watcher: &Watcher) -> Result<bool> {
     };
 
     if !has_changed {
-        return Ok(false);
+        return Ok((false, Vec::new()));
     }
 
     // 4. Content has changed, search for keywords
@@ -127,16 +141,24 @@ async fn check_watcher(watcher: &Watcher) -> Result<bool> {
 
     // 5. Send notification if keywords found
     if !matches.is_empty() {
+        // Get unique keywords that were matched
+        let matched_keywords: Vec<String> = matches
+            .iter()
+            .map(|m| m.keyword.clone())
+            .collect::<std::collections::HashSet<_>>()
+            .into_iter()
+            .collect();
+
         notify::send_notification(&watcher.url, &matches)?;
 
         // Update cache since we found matches
         cache::write_cache(&cache_path, &new_content)?;
 
-        return Ok(true);
+        return Ok((true, matched_keywords));
     }
 
     // 6. No keywords found, but still update cache
     cache::write_cache(&cache_path, &new_content)?;
 
-    Ok(false)
+    Ok((false, Vec::new()))
 }
