@@ -1,0 +1,18 @@
+# Rust build artifacts
+/target
+Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local development cache (for testing)
+.cache/
+.config/
+
+# Debug files
+*.pdb
