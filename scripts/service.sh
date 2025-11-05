@@ -107,10 +107,25 @@ stop_service() {
 
 # Restart service
 restart_service() {
+    check_installed
     echo -e "${BLUE}Restarting service...${NC}"
-    stop_service 2>/dev/null || true
+
+    if is_running; then
+        echo -e "${BLUE}Stopping service...${NC}"
+        launchctl kill SIGTERM "gui/$(id -u)/$SERVICE_NAME"
+        sleep 1
+    fi
+
+    echo -e "${BLUE}Starting service...${NC}"
+    launchctl start "$SERVICE_NAME"
     sleep 1
-    start_service
+
+    if is_running; then
+        echo -e "${GREEN}✓ Service restarted successfully${NC}"
+    else
+        echo -e "${RED}✗ Failed to restart service${NC}"
+        exit 1
+    fi
 }
 
 # Check status

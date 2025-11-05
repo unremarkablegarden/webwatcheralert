@@ -781,23 +781,24 @@ impl UI {
         match output {
             Ok(result) => {
                 if result.status.success() {
-                    // Parse output to check if service has a PID
-                    // Output format: "PID    Status    Label"
-                    // If PID is "-", the service is loaded but not running
+                    // Parse plist-style output to check if service has a PID
+                    // Look for: "PID" = <number>;
                     let output_str = String::from_utf8_lossy(&result.stdout);
 
-                    // Look for the PID in the first column
-                    // If it's a number, service is running; if it's "-", it's not
+                    // Check if there's a PID field with a numeric value
                     self.service_is_running = output_str
                         .lines()
                         .any(|line| {
-                            let parts: Vec<&str> = line.split_whitespace().collect();
-                            if let Some(first) = parts.first() {
-                                // Check if first column is a number (PID) rather than "-"
-                                first.parse::<i32>().is_ok()
-                            } else {
-                                false
+                            // Look for lines like: "PID" = 12345;
+                            if line.contains("\"PID\"") && line.contains("=") {
+                                if let Some(value_part) = line.split('=').nth(1) {
+                                    // Extract the number part (remove semicolon and whitespace)
+                                    let value = value_part.trim().trim_end_matches(';').trim();
+                                    // If it's a number, service is running
+                                    return value.parse::<i32>().is_ok();
+                                }
                             }
+                            false
                         });
                 } else {
                     // Service not even loaded
